@@ -1,0 +1,550 @@
+#1
+
+
+
+# Main Application Class
+
+package com.example.springbootdemo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SpringbootdemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringbootdemoApplication.class, args);
+    }
+}
+
+
+
+#Controller Class
+
+package com.example.springbootdemo;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Welcome to Spring Boot";
+    }
+}
+
+
+
+
+
+
+
+
+#2
+
+
+
+#employee model 
+package com.example.employeemanagement.model;
+
+public class Employee {
+
+    private Long employeeId;
+    private String employeeName;
+    private String department;
+    private double salary;
+
+    public Employee() {
+    }
+
+    public Employee(Long employeeId, String employeeName,
+                    String department, double salary) {
+        this.employeeId = employeeId;
+        this.employeeName = employeeName;
+        this.department = department;
+        this.salary = salary;
+    }
+
+    public Long getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+}
+
+
+#employee controller
+
+package com.example.employeemanagement.controller;
+
+import com.example.employeemanagement.model.Employee;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+public class EmployeeController {
+
+    private List<Employee> employees = new ArrayList<>();
+
+    public EmployeeController() {
+        employees.add(new Employee(1L, "John", "IT", 50000));
+        employees.add(new Employee(2L, "Mary", "HR", 45000));
+    }
+
+    @GetMapping("/employees")
+    public List<Employee> getAllEmployees() {
+        return employees;
+    }
+
+    @GetMapping("/employee/{id}")
+    public Employee getEmployeeById(@PathVariable Long id) {
+        return employees.stream()
+                .filter(emp -> emp.getEmployeeId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @PostMapping("/employee")
+    public String addEmployee(@RequestBody Employee employee) {
+        employees.add(employee);
+        return "Employee added successfully";
+    }
+
+    @PutMapping("/employee/{id}")
+    public String updateEmployee(@PathVariable Long id,
+                                 @RequestBody Employee updatedEmployee) {
+
+        for (Employee employee : employees) {
+            if (employee.getEmployeeId().equals(id)) {
+                employee.setEmployeeName(updatedEmployee.getEmployeeName());
+                employee.setDepartment(updatedEmployee.getDepartment());
+                employee.setSalary(updatedEmployee.getSalary());
+                return "Employee updated successfully";
+            }
+        }
+        return "Employee not found";
+    }
+
+    @DeleteMapping("/employee/{id}")
+    public String deleteEmployee(@PathVariable Long id) {
+
+        boolean removed = employees.removeIf(
+                employee -> employee.getEmployeeId().equals(id));
+
+        return removed
+                ? "Employee deleted successfully"
+                : "Employee not found";
+    }
+}
+
+
+
+#main application class
+
+package com.example.employeemanagement;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class EmployeeManagementApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(EmployeeManagementApplication.class, args);
+    }
+}
+
+
+#3
+
+#model class
+
+package com.example.model;
+
+public class Student {
+
+    private String studentId;
+    private String name;
+    private String email;
+    private String course;
+
+    public Student() {
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getCourse() {
+        return course;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
+    }
+}
+
+
+
+#controller class
+
+package com.example.controller;
+
+import com.example.model.Student;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+public class StudentController {
+
+    @GetMapping("/register")
+    public String showForm(Model model) {
+        model.addAttribute("student", new Student());
+        return "registration";
+    }
+
+    @PostMapping("/register")
+    public String registerStudent(@ModelAttribute("student") Student student,
+                                  Model model) {
+
+        model.addAttribute("student", student);
+        return "success";
+    }
+}
+
+
+#4
+
+#MODEL CLASS
+
+package com.example.model;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
+public class User {
+
+    @NotBlank(message = "Name cannot be empty")
+    private String name;
+
+    @Email(message = "Enter a valid email address")
+    private String email;
+
+    @Pattern(
+        regexp = "^[0-9]{10}$",
+        message = "Mobile number must contain exactly 10 digits"
+    )
+    private String mobileNumber;
+
+    @Min(value = 18, message = "Age must be greater than or equal to 18")
+    private int age;
+
+    // Getters and Setters
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+
+
+#CONTROLLER CLASS
+
+
+package com.example.controller;
+
+import com.example.model.User;
+import jakarta.validation.Valid;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+public class UserController {
+
+    @GetMapping("/user")
+    public String showForm(Model model) {
+        model.addAttribute("user", new User());
+        return "user-form";
+    }
+
+    @PostMapping("/submit")
+    public String submitForm(
+            @Valid @ModelAttribute("user") User user,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return "user-form";
+        }
+
+        return "success";
+    }
+}
+
+
+
+
+
+
+#5
+
+#resourcenotfoundexception class
+
+package com.example.employee.exception;
+
+public class ResourceNotFoundException extends RuntimeException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+}
+
+
+#globalexceptionhandler class
+
+package com.example.employee.exception;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import java.time.LocalDateTime;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+            ResourceNotFoundException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Resource Not Found",
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleDatabaseException(
+            DataAccessException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Database Error",
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(error,
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(
+            Exception ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(error,
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
+#6
+
+#securityconfig class 
+package com.example.security.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService(
+            PasswordEncoder passwordEncoder) {
+
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("admin123"))
+                .roles("ADMIN")
+                .build();
+
+        UserDetails user = User.builder()
+                .username("user")
+                .password(passwordEncoder.encode("user123"))
+                .roles("USER")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin, user);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
+
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                .anyRequest().authenticated()
+            )
+            .formLogin(Customizer.withDefaults())
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+            );
+
+        return http.build();
+    }
+}
+
+#controller class
+package com.example.security.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HomeController {
+
+    @GetMapping("/")
+    public String home() {
+        return "Welcome!";
+    }
+
+    @GetMapping("/user/dashboard")
+    public String userDashboard() {
+        return "User Dashboard";
+    }
+
+    @GetMapping("/admin/dashboard")
+    public String adminDashboard() {
+        return "Admin Dashboard";
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
